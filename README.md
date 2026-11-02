@@ -1,76 +1,85 @@
-# solo-setup-tool
+# solo-manager
 
-A bash script for deploying a local **Hiero Solo** network using the Solo CLI.
+A lightweight Java CLI tool for deploying and managing a local **Hiero Solo Network** using the Solo CLI.
 
-## Scripts Overview
+## Commands Overview
 
-| Script | Command | Description |
-| :--- | :--- | :--- |
-| `solo-ctl` |	`check` | Validates system dependencies (Docker, Kind, Kubectl, Solo CLI). |
-| `solo-ctl` |	`bake` |	Deploys the network and other components (Mirror, RPC, Explorer). |
-| `solo-ctl` |	`purge` |	Destroys the cluster, cleans up data, and other ghost processes. |
+| Command | Description |
+| :--- | :--- |
+|	`setup`   | Sets up and deploys a local Hiero Solo network and its selected components. |
+|	`purge` |	Destroys the Solo deployment, cleans up resources, and stops background port-forwarding processes. |
 
----
 
 ## Usage
 
-### 1. System Check
+### 1. Setup
 
-Before deploying, ensure your environment meets the dependencies requirements.
+Deploy a local Hiero Solo network with the default configuration:
 
 ```bash
-./solo-ctl check
+java SoloManager.java setup
 ```
 
-### 2. Deploy (Bake)
-You can deploy a minimal consensus node or include additional ecosystem components using flags.
-
-**Full Stack Deployment:**
-```bash
-./solo-ctl bake
-```
+### 2. Configure Deployment
+You can customize the deployment by enabling or disabling ecosystem components and specifying component versions.
 
 **Core/Light Deployment (Consensus only):**
 ```bash
-./solo-ctl bake --core
+java SoloManager.java setup
+```
+
+**Full Stack Deployment:**
+```bash
+java SoloManager.java setup --mirror-node true --relay true --explorer true
 ```
 
 **Custom Deployment:**
 
-Enable specific components and override default versions:
-
 ```bash
-./solo-ctl bake --mirror false --explorer false --node-tag v0.72.0
+java SoloManager.java setup \
+  --mirror-node false \
+  --relay true \
+  --explorer false \
+  --consensus-version v0.72.0 \
+  --mirror-node-version v0.153.0
 ```
 
-### 3. Clean Up (Purge)
+### 3. Purge
 
-To completely remove the deployment, reclaim system resources, and stop port-forwarding:
+Remove the existing Solo deployment, clean up associated resources, and stop background port-forwarding processes.
+
 ```bash
-./solo-ctl purge
+java SoloManager.java purge
 ```
 
-## Configuration Flags 
+## Configuration Flags
+
 | Flag | Argument |	Default |	Description |
 | :--- | :--- | :--- | :--- |
-| `-c`, `--core` |	N/A |	`false` |	Minimal mode runs only the Consensus Node. |
-| `-m`, `--mirror` |	`true/false` |	`true` |	Deploys the Mirror Node. |
-| `-r`, `--rpc` |	`true/false` |	`true` |	Deploys the JSON-RPC Relay. |
-| `-e`, `--explorer` |	`true`/`false` | `true` | Deploys the Block Explorer. |
-| `-nt`, `--node-tag` |	`string` | `v0.73.0` | Sets the Consensus Node release tag. |
-| `-mt`, `--mirror-tag` | `string` | `v0.153.0` | Sets the Mirror Node release tag. |
+| `--mirror-node` |	`true/false` |	`false` |	Deploys the Mirror Node. |
+| `--relay` |	`true/false` |	`false` |	Deploys the JSON-RPC Relay. |
+| `--explorer` |	`true`/`false` | `false` | Deploys the Block Explorer. |
+| `--consensus-node-tag` |	`string` | `v0.77.0` | Sets the Consensus Node release tag. |
+| `--mirror-node-tag` | `string` | `v0.163.0` | Sets the Mirror Node release tag. |
 
 
-## Output Artifacts
-
-After a successful `bake`, the tool generates a `out/` directory with below details:
-- `solo.txt`: Environment variables for your SDK (Account ID, Keys).
-- `account-output.txt`: Detailed JSON logs from the ledger account creation.
 
 ## Port Forwarding
-The script automatically handles background port-forwards for Hiero services.
 
-- **GRPC:** 50211
-- **Mirror REST:** 5551
-- **Mirror Java REST:** 8084
-- **Mirror Node Explorer:** 38080
+The tool automatically configures background port-forwarding for the deployed Hiero services.
+
+| Service | Port |
+|---|---:|
+| Consensus Node gRPC | `35211` |
+| Mirror Node REST API | `38081` |
+| Mirror Node Java REST API | `8084` |
+| Mirror Node Explorer | `8081` |
+| JSON-RPC Relay | `37546` |
+
+## Requirements
+Ensure the following dependencies are installed and available in your system:
+- Java 25 or later
+- Docker
+- kind
+- kubectl
+- solo
