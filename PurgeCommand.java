@@ -51,7 +51,7 @@ public class PurgeCommand {
   }
 
   void deleteSoloConfig() {
-    new Process("Remove (~/.solo) directory....", "rm", "-rf", "~/.solo", "logs/solo_deployment.log").execute();
+    new Process("Remove (~/.solo) directory....", "rm", "-rf", "~/.solo", "logs/solo_state.txt").execute();
   }
 
   void dockerSystemCleanup() {
